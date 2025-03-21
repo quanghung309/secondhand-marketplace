@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import NavBar from "@/components/NavBar";
@@ -15,6 +14,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/CartContext";
 
 // Mock data for product listings
 const MOCK_PRODUCTS = [
@@ -309,6 +309,18 @@ const ProductCard = ({
   viewMode: "grid" | "list";
 }) => {
   const { id, title, price, condition, location, image, seller } = product;
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      title,
+      price,
+      seller: seller.name,
+      image,
+      quantity: 1
+    });
+  };
 
   return (
     <Card className={cn(
@@ -356,7 +368,7 @@ const ProductCard = ({
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => alert(`Added ${title} to cart!`)} 
+            onClick={handleAddToCart} 
             className="flex-1"
           >
             <ShoppingCart size={16} className="mr-1" /> Add to Cart

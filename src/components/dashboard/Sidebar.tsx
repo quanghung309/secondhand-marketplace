@@ -13,7 +13,7 @@ const Sidebar = ({ isSidebarOpen }: SidebarProps) => {
     { icon: <Home size={20} />, label: "Dashboard", active: true, to: "/dashboard" },
     { icon: <Package size={20} />, label: "My Listings", count: 12, to: "/my-listings" },
     { icon: <ShoppingBag size={20} />, label: "Purchases", count: 3, to: "/purchases" },
-    { icon: <MessageCircle size={20} />, label: "Messages", count: 5, to: "#" },
+    { icon: <MessageCircle size={20} />, label: "Messages", count: 5, to: "/messages" },
     { icon: <User size={20} />, label: "Profile", to: "/profile" },
     { icon: <Settings size={20} />, label: "Settings", to: "#" },
   ];

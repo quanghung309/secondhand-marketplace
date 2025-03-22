@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
-import { Bell, ChevronDown, Menu, Search, ShoppingBag } from "lucide-react";
+import { ChevronDown, Menu, MessageCircle, Search, ShoppingBag } from "lucide-react";
+import NotificationPopover from "@/components/NotificationPopover";
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -33,10 +34,11 @@ const Header = ({ isSidebarOpen, setIsSidebarOpen }: HeaderProps) => {
             />
           </form>
           
-          <button className="rounded-full w-9 h-9 inline-flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-secondary transition-colors relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full"></span>
-          </button>
+          <Link to="/messages" className="rounded-full w-9 h-9 inline-flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-secondary transition-colors">
+            <MessageCircle className="h-5 w-5" />
+          </Link>
+          
+          <NotificationPopover />
           
           <button className="flex items-center gap-2 rounded-full p-1.5 text-sm font-medium hover:bg-secondary transition-colors">
             <div className="relative">

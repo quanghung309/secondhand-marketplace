@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, ShoppingBag, ShoppingCart, Package, Heart } from "lucide-react";
+import { Menu, X, User, ShoppingBag, ShoppingCart, Package, Heart, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { 
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import NotificationPopover from "./NotificationPopover";
 
 const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,17 +83,27 @@ const NavBar = () => {
         {/* Auth Actions and Cart */}
         <div className="hidden md:flex items-center gap-4">
           <Link 
+            to="/messages" 
+            className="relative p-2 text-foreground/80 hover:text-foreground transition-colors" 
+            aria-label="Messages"
+          >
+            <MessageCircle className="w-5 h-5" />
+          </Link>
+          
+          <Link 
             to="/cart" 
             className="relative p-2 text-foreground/80 hover:text-foreground transition-colors" 
             aria-label="Cart"
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-5 w-5" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {cartCount > 9 ? '9+' : cartCount}
               </span>
             )}
           </Link>
+          
+          <NotificationPopover />
           
           {/* Account dropdown */}
           <DropdownMenu>
@@ -125,6 +136,12 @@ const NavBar = () => {
                   Purchases
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/messages" className="cursor-pointer">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Messages
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/signin" className="cursor-pointer">Sign In</Link>
@@ -150,6 +167,8 @@ const NavBar = () => {
               </span>
             )}
           </Link>
+          
+          <NotificationPopover />
           
           <button 
             className="text-foreground/80 hover:text-foreground transition-colors" 
@@ -200,6 +219,11 @@ const NavBar = () => {
           <Link to="/purchases" className="text-sm font-medium py-2 flex items-center gap-2 text-foreground/80">
             <ShoppingCart className="h-4 w-4" />
             Purchases
+          </Link>
+          
+          <Link to="/messages" className="text-sm font-medium py-2 flex items-center gap-2 text-foreground/80">
+            <MessageCircle className="h-4 w-4" />
+            Messages
           </Link>
           
           <div className="h-px w-full bg-border my-2" />

@@ -94,6 +94,7 @@ const Purchases = () => {
       seller: "SoundMaster",
       purchaseDate: "2023-12-05",
       status: "shipped",
+      isRated: false,
       estimatedDelivery: "2023-12-12",
       trackingNumber: "TRK456789123"
     },
@@ -106,6 +107,7 @@ const Purchases = () => {
       seller: "ClassicSound",
       purchaseDate: "2023-11-30",
       status: "pending",
+      isRated: false,
       estimatedDelivery: "2023-12-07"
     },
     {

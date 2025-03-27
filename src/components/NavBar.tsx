@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import NotificationPopover from "./NotificationPopover";
+import VisualSearch from "./VisualSearch";
 
 const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,7 +42,11 @@ const NavBar = () => {
     {
       name: "Browse",
       path: "/browse"
-    }, 
+    },
+    {
+      name: "Auctions",
+      path: "/auctions"
+    },
     {
       name: "Sell",
       path: "/sell"
@@ -82,6 +87,8 @@ const NavBar = () => {
 
         {/* Auth Actions and Cart */}
         <div className="hidden md:flex items-center gap-4">
+          <VisualSearch />
+          
           <Link 
             to="/messages" 
             className="relative p-2 text-foreground/80 hover:text-foreground transition-colors" 
@@ -155,6 +162,8 @@ const NavBar = () => {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-3">
+          <VisualSearch />
+          
           <Link 
             to="/cart" 
             className="relative p-2 text-foreground/80 hover:text-foreground transition-colors" 

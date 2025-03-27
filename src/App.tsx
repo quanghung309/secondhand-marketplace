@@ -20,6 +20,7 @@ import Purchases from "./pages/Purchases";
 import Messages from "./pages/Messages";
 import Auctions from "./pages/Auctions";
 import AuctionDetail from "./pages/AuctionDetail";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/messages" element={<Messages />} />
             <Route path="/auctions" element={<Auctions />} />
             <Route path="/auction/:id" element={<AuctionDetail />} />
+            <Route path="/about" element={<About />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

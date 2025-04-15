@@ -23,8 +23,8 @@ export interface Listing {
   featured?: boolean;
 }
 
-// Define the database product structure to help with type safety
-interface DbProduct {
+// Define the exact shape of data returned from the Supabase database
+interface SupabaseProduct {
   id: string;
   title: string;
   description: string;
@@ -63,8 +63,11 @@ export const useListings = (status?: ProductStatus) => {
         throw error;
       }
 
-      // Convert the raw data to our Listing type with explicit typing
-      const listings: Listing[] = data.map(item => ({
+      // Explicitly type the raw data as SupabaseProduct[]
+      const supabaseData = data as SupabaseProduct[];
+      
+      // Convert the raw data to our Listing type
+      const listings: Listing[] = supabaseData.map(item => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -72,14 +75,14 @@ export const useListings = (status?: ProductStatus) => {
         condition: item.condition,
         category: item.category,
         images: item.images || [],
-        status: item.status as ProductStatus, // Use status directly from DB
+        status: item.status as ProductStatus, 
         created_at: item.created_at,
-        expires_at: item.expires_at ?? null,
+        expires_at: item.expires_at,
         seller_id: item.seller_id,
-        brand: item.brand ?? null,
-        is_sold: item.is_sold ?? false,
-        updated_at: item.updated_at ?? undefined,
-        featured: item.featured ?? false,
+        brand: item.brand,
+        is_sold: item.is_sold,
+        updated_at: item.updated_at,
+        featured: item.featured,
       }));
 
       return listings;

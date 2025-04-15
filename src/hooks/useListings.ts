@@ -44,8 +44,14 @@ export const useListings = (status?: ProductStatus) => {
         throw error;
       }
 
-      // Return the data with proper typing
-      return data as Listing[];
+      // Transform the data to match our Listing interface
+      const listings = data.map(item => ({
+        ...item,
+        status: item.is_sold ? "sold" : "active" as ProductStatus,
+        expires_at: null
+      })) as Listing[];
+
+      return listings;
     },
     enabled: !!user,
   });
@@ -67,7 +73,7 @@ export const useUpdateListing = () => {
         throw error;
       }
 
-      return data as Listing;
+      return data as unknown as Listing;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["listings"] });
@@ -101,4 +107,3 @@ export const useDeleteListing = () => {
     isDeleting: deleteListingMutation.isPending 
   };
 };
-

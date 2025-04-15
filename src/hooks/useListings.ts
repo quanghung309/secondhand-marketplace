@@ -86,9 +86,10 @@ const fetchListings = async (
 
 export const useListings = (status?: ProductStatus) => {
   const { user } = useAuth();
-
-  return useQuery<Listing[]>({
-    queryKey: ["listings", user?.id, status],
+  
+  // Explicitly define the function type and return type to avoid excessive type inference
+  return useQuery({
+    queryKey: ["listings", user?.id, status] as const,
     queryFn: () => fetchListings(user?.id, status),
     enabled: !!user,
   });

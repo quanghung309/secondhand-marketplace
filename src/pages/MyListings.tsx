@@ -9,11 +9,11 @@ import {
   Edit2, 
   Trash2, 
   Eye, 
-  ChevronDown, 
   Check, 
   X, 
   AlertTriangle, 
-  Clock
+  Clock,
+  FileText
 } from "lucide-react";
 import { 
   Dialog, 
@@ -24,25 +24,14 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
-type ListingStatus = "active" | "sold" | "expired" | "draft";
-
-interface Listing {
-  id: number;
-  title: string;
-  price: number;
-  image: string;
-  status: ListingStatus;
-  createdAt: string;
-  views: number;
-  likes: number;
-}
+import { useListings, useDeleteListing, type ProductStatus } from "@/hooks/useListings";
+import { formatDistanceToNow } from "date-fns";
 
 const statusIcons = {
   active: <Check className="h-4 w-4 text-green-500" />,
   sold: <Check className="h-4 w-4 text-blue-500" />,
   expired: <Clock className="h-4 w-4 text-red-500" />,
-  draft: <AlertTriangle className="h-4 w-4 text-amber-500" />
+  draft: <FileText className="h-4 w-4 text-amber-500" />
 };
 
 const statusLabels = {
@@ -60,78 +49,39 @@ const statusClasses = {
 };
 
 const MyListings = () => {
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<ProductStatus | "all">("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-  const [selectedListing, setSelectedListing] = useState<number | null>(null);
+  const [selectedListing, setSelectedListing] = useState<string | null>(null);
 
-  const mockListings: Listing[] = [
-    {
-      id: 1,
-      title: "Vintage Camera",
-      price: 120,
-      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=200&h=200&auto=format&fit=crop",
-      status: "active",
-      createdAt: "2023-10-12",
-      views: 24,
-      likes: 5
-    },
-    {
-      id: 2,
-      title: "Leather Backpack",
-      price: 85,
-      image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=200&h=200&auto=format&fit=crop",
-      status: "active",
-      createdAt: "2023-09-28",
-      views: 18,
-      likes: 3
-    },
-    {
-      id: 3,
-      title: "Bluetooth Speaker",
-      price: 45,
-      image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=200&h=200&auto=format&fit=crop",
-      status: "sold",
-      createdAt: "2023-08-15",
-      views: 32,
-      likes: 7
-    },
-    {
-      id: 4,
-      title: "Vintage Record Player",
-      price: 250,
-      image: "https://images.unsplash.com/photo-1541667558913-5510f7461cf4?q=80&w=200&h=200&auto=format&fit=crop",
-      status: "expired",
-      createdAt: "2023-06-10",
-      views: 15,
-      likes: 2
-    },
-    {
-      id: 5,
-      title: "Mechanical Keyboard",
-      price: 95,
-      image: "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?q=80&w=200&h=200&auto=format&fit=crop",
-      status: "draft",
-      createdAt: "2023-11-02",
-      views: 0,
-      likes: 0
-    },
-  ];
+  const { data: listings, isLoading } = useListings(activeTab === "all" ? undefined : activeTab);
+  const { deleteListing } = useDeleteListing();
 
-  const filteredListings = mockListings.filter(listing => {
-    if (activeTab === "all") return true;
-    return listing.status === activeTab;
-  });
-
-  const handleOpenDeleteDialog = (id: number) => {
+  const handleOpenDeleteDialog = (id: string) => {
     setSelectedListing(id);
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteListing = () => {
-    // This would be an API call in a real application
-    toast.success("Listing deleted successfully");
-    setDeleteDialogOpen(false);
+  const handleDeleteListing = async () => {
+    if (!selectedListing) return;
+    
+    try {
+      await deleteListing(selectedListing);
+      toast.success("Listing deleted successfully");
+      setDeleteDialogOpen(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete listing");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container max-w-5xl py-10">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-5xl py-10">
@@ -148,7 +98,7 @@ const MyListings = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue="all" value={activeTab} onValueChange={(value) => setActiveTab(value as ProductStatus | "all")}>
         <TabsList className="grid grid-cols-5 mb-6">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
@@ -158,10 +108,12 @@ const MyListings = () => {
         </TabsList>
 
         <TabsContent value={activeTab} className="space-y-4">
-          {filteredListings.length === 0 ? (
+          {!listings?.length ? (
             <div className="text-center py-16 border rounded-lg bg-muted/30">
               <h3 className="font-medium text-lg">No listings found</h3>
-              <p className="text-muted-foreground mt-1">You don't have any {activeTab !== "all" ? activeTab : ""} listings yet.</p>
+              <p className="text-muted-foreground mt-1">
+                You don't have any {activeTab !== "all" ? activeTab : ""} listings yet.
+              </p>
               {activeTab !== "draft" && (
                 <Button asChild variant="outline" className="mt-4">
                   <Link to="/sell">Create a listing</Link>
@@ -170,13 +122,13 @@ const MyListings = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredListings.map((listing) => (
+              {listings.map((listing) => (
                 <Card key={listing.id} className="overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex flex-col sm:flex-row">
                       <div className="w-full sm:w-48 h-48 sm:h-auto">
                         <img 
-                          src={listing.image} 
+                          src={listing.images[0]} 
                           alt={listing.title} 
                           className="w-full h-full object-cover"
                         />
@@ -193,13 +145,15 @@ const MyListings = () => {
                         
                         <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-muted-foreground">
                           <div>
-                            <span>Date listed: </span>
-                            <span>{listing.createdAt}</span>
+                            <span>Listed: </span>
+                            <span>{formatDistanceToNow(new Date(listing.created_at))} ago</span>
                           </div>
-                          <div>
-                            <span>Views: </span>
-                            <span>{listing.views}</span>
-                          </div>
+                          {listing.expires_at && (
+                            <div>
+                              <span>Expires: </span>
+                              <span>{formatDistanceToNow(new Date(listing.expires_at))} left</span>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="mt-auto flex flex-wrap gap-2">

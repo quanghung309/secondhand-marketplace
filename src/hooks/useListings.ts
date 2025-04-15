@@ -44,16 +44,24 @@ export const useListings = (status?: ProductStatus) => {
         throw error;
       }
 
-      // Explicitly map each item to Listing interface
-      const listings = data.map(item => {
-        const listing: Listing = {
-          ...item,
-          status: item.is_sold ? "sold" : "active",
-          expires_at: null,
-          is_sold: item.is_sold
-        };
-        return listing;
-      });
+      // Convert the raw data to our Listing type with explicit typing
+      const listings: Listing[] = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        price: item.price,
+        condition: item.condition,
+        category: item.category,
+        images: item.images,
+        status: item.is_sold ? "sold" : "active",
+        created_at: item.created_at,
+        expires_at: null,
+        seller_id: item.seller_id,
+        brand: item.brand,
+        is_sold: item.is_sold,
+        updated_at: item.updated_at,
+        featured: item.featured
+      }));
 
       return listings;
     },

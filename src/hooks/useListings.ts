@@ -23,6 +23,25 @@ export interface Listing {
   featured?: boolean;
 }
 
+// Define the database product structure to help with type safety
+interface DbProduct {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  condition: string;
+  category: string;
+  images: string[];
+  status: string;
+  created_at: string;
+  expires_at: string | null;
+  seller_id: string;
+  brand: string | null;
+  is_sold: boolean;
+  updated_at: string;
+  featured: boolean;
+}
+
 export const useListings = (status?: ProductStatus) => {
   const { user } = useAuth();
 
@@ -52,15 +71,15 @@ export const useListings = (status?: ProductStatus) => {
         price: item.price,
         condition: item.condition,
         category: item.category,
-        images: item.images,
-        status: item.is_sold ? "sold" : "active",
+        images: item.images || [],
+        status: item.status as ProductStatus, // Use status directly from DB
         created_at: item.created_at,
-        expires_at: null,
+        expires_at: item.expires_at ?? null,
         seller_id: item.seller_id,
-        brand: item.brand,
-        is_sold: item.is_sold,
-        updated_at: item.updated_at,
-        featured: item.featured
+        brand: item.brand ?? null,
+        is_sold: item.is_sold ?? false,
+        updated_at: item.updated_at ?? undefined,
+        featured: item.featured ?? false,
       }));
 
       return listings;

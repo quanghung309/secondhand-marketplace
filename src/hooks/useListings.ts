@@ -42,51 +42,54 @@ interface SupabaseProduct {
   featured: boolean;
 }
 
+const fetchListings = async (
+  userId: string | undefined,
+  status?: ProductStatus
+): Promise<Listing[]> => {
+  if (!userId) return [];
+
+  let query = supabase
+    .from("products")
+    .select("*")
+    .eq("seller_id", userId);
+
+  if (status) {
+    query = query.eq("status", status);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  const supabaseData = data as SupabaseProduct[];
+
+  return supabaseData.map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    price: item.price,
+    condition: item.condition,
+    category: item.category,
+    images: item.images || [],
+    status: item.status as ProductStatus,
+    created_at: item.created_at,
+    expires_at: item.expires_at,
+    seller_id: item.seller_id,
+    brand: item.brand ?? null,
+    is_sold: item.is_sold ?? false,
+    updated_at: item.updated_at ?? undefined,
+    featured: item.featured ?? false,
+  }));
+};
+
 export const useListings = (status?: ProductStatus) => {
   const { user } = useAuth();
 
-  return useQuery({
+  return useQuery<Listing[]>({
     queryKey: ["listings", user?.id, status],
-    queryFn: async () => {
-      let query = supabase
-        .from("products")
-        .select("*")
-        .eq("seller_id", user?.id);
-
-      if (status) {
-        query = query.eq("status", status);
-      }
-
-      const { data, error } = await query.order("created_at", { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      // Explicitly type the raw data as SupabaseProduct[]
-      const supabaseData = data as SupabaseProduct[];
-      
-      // Convert the raw data to our Listing type
-      const listings: Listing[] = supabaseData.map(item => ({
-        id: item.id,
-        title: item.title,
-        description: item.description,
-        price: item.price,
-        condition: item.condition,
-        category: item.category,
-        images: item.images || [],
-        status: item.status as ProductStatus, 
-        created_at: item.created_at,
-        expires_at: item.expires_at,
-        seller_id: item.seller_id,
-        brand: item.brand,
-        is_sold: item.is_sold,
-        updated_at: item.updated_at,
-        featured: item.featured,
-      }));
-
-      return listings;
-    },
+    queryFn: () => fetchListings(user?.id, status),
     enabled: !!user,
   });
 };

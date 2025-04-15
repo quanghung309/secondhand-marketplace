@@ -44,12 +44,16 @@ export const useListings = (status?: ProductStatus) => {
         throw error;
       }
 
-      // Transform the data to match our Listing interface
-      const listings = data.map(item => ({
-        ...item,
-        status: item.is_sold ? "sold" : "active" as ProductStatus,
-        expires_at: null
-      })) as Listing[];
+      // Explicitly map each item to Listing interface
+      const listings = data.map(item => {
+        const listing: Listing = {
+          ...item,
+          status: item.is_sold ? "sold" : "active",
+          expires_at: null,
+          is_sold: item.is_sold
+        };
+        return listing;
+      });
 
       return listings;
     },

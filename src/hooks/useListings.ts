@@ -1,5 +1,5 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
@@ -17,6 +17,10 @@ export interface Listing {
   created_at: string;
   expires_at: string | null;
   seller_id: string;
+  brand?: string | null;
+  is_sold?: boolean;
+  updated_at?: string;
+  featured?: boolean;
 }
 
 export const useListings = (status?: ProductStatus) => {
@@ -40,42 +44,61 @@ export const useListings = (status?: ProductStatus) => {
         throw error;
       }
 
-      return data as Listing[];
+      // Cast the data to our Listing type, ensuring it matches our interface
+      return (data as unknown) as Listing[];
     },
     enabled: !!user,
   });
 };
 
 export const useUpdateListing = () => {
-  const updateListing = async (id: string, updates: Partial<Listing>) => {
-    const { data, error } = await supabase
-      .from("products")
-      .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
+  const queryClient = useQueryClient();
 
-    if (error) {
-      throw error;
-    }
+  const updateListingMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Listing> }) => {
+      const { data, error } = await supabase
+        .from("products")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single();
 
-    return data;
-  };
+      if (error) {
+        throw error;
+      }
 
-  return { updateListing };
+      return data as Listing;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listings"] });
+    },
+  });
+
+  return { updateListing: updateListingMutation.mutate, isUpdating: updateListingMutation.isPending };
 };
 
 export const useDeleteListing = () => {
-  const deleteListing = async (id: string) => {
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", id);
+  const queryClient = useQueryClient();
 
-    if (error) {
-      throw error;
-    }
+  const deleteListingMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["listings"] });
+    },
+  });
+
+  return { 
+    deleteListing: deleteListingMutation.mutate, 
+    isDeleting: deleteListingMutation.isPending 
   };
-
-  return { deleteListing };
 };
+

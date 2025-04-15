@@ -44,8 +44,8 @@ export const useListings = (status?: ProductStatus) => {
         throw error;
       }
 
-      // Cast the data to our Listing type, ensuring it matches our interface
-      return (data as unknown) as Listing[];
+      // Return the data with proper typing
+      return data as Listing[];
     },
     enabled: !!user,
   });
